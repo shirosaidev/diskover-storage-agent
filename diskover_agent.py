@@ -49,7 +49,7 @@ class AgentConnection:
         except requests.exceptions.RequestException as e:
             warnings.warn(e)
             return
-        self.lastresptime = round(time.time() - starttime, 4)
+        self.resptime = round(time.time() - starttime, 4)
         dirlist = self.r.text.split("\n")
         dirs = []
         nondirs = []
@@ -94,5 +94,5 @@ class AgentConnection:
         return self.host
 
 
-    def last_response_time(self):
+    def response_time(self):
         return self.resptime
