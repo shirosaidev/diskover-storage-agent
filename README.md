@@ -50,10 +50,7 @@ stornode2
 >>> c.last_response_time()
 0.0182
 >>> c.walk('/mnt/isilon/somedir')
-('/mnt/isilon/someotherdir', ['subdira', 'subdirb'], ['filea.ext', 'fileb.ext'])
-('/mnt/isilon/someotherdir/subdira', [], ['file.ext'])
-('/mnt/isilon/someotherdir/subdirb', ['subdir'], [])
-...
+<generator object walk at 0x104e675f0>
 ```
 
 Example using curl:
