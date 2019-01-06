@@ -36,18 +36,19 @@ Example to access the http agents in python import diskover_agent.py module:
 ```
 >>> import diskover_agent
 >>> c = diskover_agent.AgentConnection(hosts=['stornode1', 'stornode2'])
+>>> c.connect()
 >>> c.listdir('/mnt/isilon/somedir')
 ('/mnt/isilon/somedir', ['subdir1', 'subdir2'], ['file1.ext', 'file2.ext'])
 >>> c.last_host()
 stornode1
 >>> c.last_response_time()
-0.0326
+0.0198
 >>> c.listdir('/mnt/isilon/someotherdir')
 ('/mnt/isilon/someotherdir', ['subdira', 'subdirb'], ['filea.ext', 'fileb.ext'])
 >>> c.last_host()
 stornode2
 >>> c.last_response_time()
-0.0214
+0.0182
 >>> c.walk('/mnt/isilon/somedir')
 ('/mnt/isilon/someotherdir', ['subdira', 'subdirb'], ['filea.ext', 'fileb.ext'])
 ('/mnt/isilon/someotherdir/subdira', [], ['file.ext'])
