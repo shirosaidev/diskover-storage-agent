@@ -9,8 +9,9 @@ diskover storage agent is released under the Apache 2.0 license.
 See LICENSE for the full license text.
 """
 
-import time
 import requests
+import os
+import time
 import random
 import warnings
 
@@ -36,8 +37,8 @@ class AgentConnection:
         self.last_host = self.hosts[i]
         return url
 
-    def get_dir_list(self, path):
-        """Returns a dirlist set similiar to scandir
+    def listdir(self, path):
+        """Yields a dirlist set similiar to os.listdir
         """
         url = self.load_balanced_conn(path)
         starttime = time.time()
@@ -57,7 +58,18 @@ class AgentConnection:
                 dirs.append(item.rstrip('/'))
             elif not item.endswith('*'):  # file
                 nondirs.append(item)
-        return (path, dirs, nondirs)
+        yield path, dirs, nondirs
+
+    def walk(self, top):
+        """Yields a recursive dirlist set similiar to os.walk
+        """
+        for root, dirs, files in self.listdir(top):
+            # Yield before recursion
+            yield root, dirs, files
+            # Recurse into sub-directories
+            for d_path in dirs:
+                for entry in self.walk(os.path.join(root, d_path)):
+                    yield entry
 
     def get_status_code(self):
         return self.r.status_code

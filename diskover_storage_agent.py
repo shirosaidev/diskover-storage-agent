@@ -21,6 +21,10 @@ except ImportError:
 import threading
 import time
 import logging
+try:
+    from urllib import unquote
+except ImportError:
+    from urllib.parse import unquote
 
 version = '0.1.0'
 __version__ = version
@@ -127,6 +131,8 @@ def socket_thread_handler(threadnum, q):
             #path = data.split('\r\n')[-1]
             # grab path from header sent by curl PUT /somepath HTTP/1.1
             path = data.split('\r\n')[0].split(" ")[1]
+            # decode url to path
+            path = unquote(path)
             logger.info("[thread-%s]: Got dirlist request from %s" % (threadnum, addr))
             # get dirlist from json data
             send_ls_output(threadnum, path, clientsock, addr)
