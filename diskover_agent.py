@@ -94,5 +94,5 @@ class AgentConnection:
         return self.host
 
 
-    def response_time(self):
+    def last_response_time(self):
         return self.resptime
