@@ -21,8 +21,8 @@ class AgentConnection:
         self.hosts = hosts
         self.port = port
         self.r = None
-        self.last_host = None
-        self.last_response_time = None
+        self.lasthost = None
+        self.lastresptime = None
 
 
     def load_balanced_conn(self, path):
@@ -34,7 +34,7 @@ class AgentConnection:
             return None
         i = random.randint(0, len(self.hosts)-1)
         url = 'http://%s:%s%s' % (self.hosts[i], self.port, path)
-        self.last_host = self.hosts[i]
+        self.lasthost = self.hosts[i]
         return url
 
     def listdir(self, path):
@@ -47,7 +47,7 @@ class AgentConnection:
         except requests.exceptions.RequestException as e:
             warnings.warn(e)
             return None
-        self.last_response_time = round(time.time() - starttime, 4)
+        self.lastresptime = round(time.time() - starttime, 4)
         dirlist = self.r.text.split("\n")
         dirs = []
         nondirs = []
@@ -71,20 +71,20 @@ class AgentConnection:
                 for entry in self.walk(os.path.join(root, d_path)):
                     yield entry
 
-    def get_status_code(self):
+    def status_code(self):
         return self.r.status_code
     
-    def get_content_type(self):
+    def content_type(self):
         return self.r.headers['content-type']
         
-    def get_encoding(self):
+    def encoding(self):
         return self.r.encoding
 
-    def get_text(self):
+    def text(self):
         return self.r.text
 
-    def get_last_host(self):
-        return self.last_host
+    def last_host(self):
+        return self.lasthost
 
-    def get_last_response_time(self):
-        return self.last_response_time
+    def last_response_time(self):
+        return self.lastresptime
