@@ -26,7 +26,6 @@ class AgentConnection:
         self.host = None
 
 
-
     def connect(self):
         """Sets up requests session and tries to load balance
         requests across hosts in cluster running diskover storage agent
@@ -49,7 +48,7 @@ class AgentConnection:
             self.r = self.ses.get(url)
         except requests.exceptions.RequestException as e:
             warnings.warn(e)
-            return None
+            return
         self.lastresptime = round(time.time() - starttime, 4)
         dirlist = self.r.text.split("\n")
         dirs = []
@@ -62,7 +61,6 @@ class AgentConnection:
             elif not item.endswith('*'):  # file
                 nondirs.append(item)
         yield path, dirs, nondirs
-
 
     def walk(self, top):
         """Yields a recursive dirlist set similiar to os.walk
