@@ -36,9 +36,6 @@ IS_PY3 = sys.version_info >= (3, 0)
 if IS_PY3:
 	unicode = str
 
-# list of socket client
-clientlist = []
-
 
 parser = OptionParser(version="diskover storage agent v % s" % version)
 parser.add_option("-l", "--listen", default="0.0.0.0", type=str,
@@ -73,7 +70,6 @@ def send_ls_output(threadnum, path, clientsock, addr):
     It gets a directory from the listener socket and returns
     directory listing to client using ls.
     """
-    global clientlist
 
     try:
         starttime = time.time()
@@ -90,14 +86,14 @@ def send_ls_output(threadnum, path, clientsock, addr):
             # send ls output to client
             logger.info("[thread-%s]: Sending dirlist for %s to %s" % (threadnum, localpath, addr))
             #clientsock.send(output)
-            response = "HTTP/1.0 200 OK\n" \
+            response = "HTTP/1.1 200 OK\n" \
                         +"Content-Type: text/plain\n" \
                         +"\n" \
                         +output.decode('utf-8')
             clientsock.send(response.encode('utf-8'))
         except subprocess.CalledProcessError as e:
             logger.info("[thread-%s]: Exception getting %s (%s)" % (threadnum, path, e))
-            response = "HTTP/1.0 404 Not Found\n" \
+            response = "HTTP/1.1 404 Not Found\n" \
                         +"Content-Type: text/plain\n" \
                         +"\n" \
                         +"ls: %s: No such file or directory\n" % path
@@ -127,8 +123,6 @@ def socket_thread_handler(threadnum, q):
                 clientsock.close()
                 logger.info("[thread-%s]: %s closed connection" % (threadnum, addr))
                 continue
-            # strip away any headers sent by curl
-            #path = data.split('\r\n')[-1]
             # grab path from header sent by curl PUT /somepath HTTP/1.1
             path = data.split('\r\n')[0].split(" ")[1]
             # decode url to path
@@ -155,7 +149,6 @@ def main():
     """This is the start socket server function.
     It opens a socket and waits for dirlist requests.
     """
-    global clientlist
     global logger
 
     # Set up logging
@@ -221,7 +214,6 @@ def main():
             logger.info("Got a connection from %s" % str(addr))
             # add client to list
             client = (clientsock, addr)
-            clientlist.append(client)
             # add task to Queue
             q.put(client)
 

@@ -21,29 +21,32 @@ class AgentConnection:
         self.hosts = hosts
         self.port = port
         self.r = None
-        self.lasthost = None
-        self.lastresptime = None
+        self.resptime = None
+        self.ses = None
+        self.host = None
 
 
-    def load_balanced_conn(self, path):
-        """Returns a url for requests and tries to load balance
+
+    def connect(self):
+        """Sets up requests session and tries to load balance
         requests across hosts in cluster running diskover storage agent
         """
         if len(self.hosts) == 0:
             warnings.warn("hosts not set for AgentConnection")
             return None
-        i = random.randint(0, len(self.hosts)-1)
-        url = 'http://%s:%s%s' % (self.hosts[i], self.port, path)
-        self.lasthost = self.hosts[i]
-        return url
+        self.host = random.choice(self.hosts)
+        self.ses = requests.Session()
+        adapter = requests.adapters.HTTPAdapter(pool_maxsize=100)
+        self.ses.mount('http://', adapter)
+
 
     def listdir(self, path):
         """Yields a dirlist set similiar to os.listdir
         """
-        url = self.load_balanced_conn(path)
         starttime = time.time()
+        url = 'http://%s:%s%s' % (self.host, self.port, path)
         try:
-            self.r = requests.get(url)
+            self.r = self.ses.get(url)
         except requests.exceptions.RequestException as e:
             warnings.warn(e)
             return None
@@ -60,6 +63,7 @@ class AgentConnection:
                 nondirs.append(item)
         yield path, dirs, nondirs
 
+
     def walk(self, top):
         """Yields a recursive dirlist set similiar to os.walk
         """
@@ -71,20 +75,26 @@ class AgentConnection:
                 for entry in self.walk(os.path.join(root, d_path)):
                     yield entry
 
+
     def status_code(self):
         return self.r.status_code
     
+
     def content_type(self):
         return self.r.headers['content-type']
-        
+
+
     def encoding(self):
         return self.r.encoding
+
 
     def text(self):
         return self.r.text
 
+
     def last_host(self):
-        return self.lasthost
+        return self.host
+
 
     def last_response_time(self):
-        return self.lastresptime
+        return self.resptime
