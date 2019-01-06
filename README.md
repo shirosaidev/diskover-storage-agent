@@ -1,5 +1,4 @@
 # diskover-storage-agent
-diskover storage agent
 
 A simple http server for running on storage nodes to return dir lists. Can be run on multiple storage nodes for load balancing requests. Requires python 2.6+ (no other dependencies).
 
