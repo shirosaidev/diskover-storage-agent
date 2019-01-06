@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-"""diskover - Elasticsearch file system crawler
-diskover is a file system crawler that index's
-your file metadata into Elasticsearch.
-See README.md or https://github.com/shirosaidev/diskover
+"""diskover storage agent
+See README.md or https://github.com/shirosaidev/diskover-storage-agent
 for more information.
 
-Copyright (C) Chris Park 2017-2018
-diskover is released under the Apache 2.0 license. See
-LICENSE for the full license text.
+Copyright (C) Chris Park 2019
+diskover storage agent is released under the Apache 2.0 license.
+See LICENSE for the full license text.
 """
 
 import time
