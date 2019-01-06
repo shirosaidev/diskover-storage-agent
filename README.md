@@ -3,8 +3,8 @@
 A simple http server for running on storage nodes to return dir lists. Can be run on multiple storage nodes for load balancing requests.
 
 ### Requirements
-- Python 2.6+ (no other dependencies)
-
+- Python 2.6+ (no other dependencies for server)
+- requests python module (only needed for client diskover_agent module)
 
 ### Usage
 
