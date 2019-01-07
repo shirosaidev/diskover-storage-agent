@@ -35,8 +35,9 @@ Example to access the http agents in python import diskover_agent.py module:
 
 ```
 >>> import diskover_agent
->>> c = diskover_agent.AgentConnection(hosts=['stornode1', 'stornode2'])
->>> c.hostlist
+>>> hostlist = ['stornode1', 'stornode2']
+>>> c = diskover_agent.AgentConnection(hosts=hostlist)
+>>> c.hostlist()
 ['stornode1', 'stornode2']
 >>> c.connect()
 >>> c.conn_host()
@@ -52,9 +53,10 @@ stornode2
 ('/mnt/isilon/someotherdir', ['subdira', 'subdirb'], ['filea.ext', 'fileb.ext'])
 >>> c.last_response_time()
 0.0182
->>> diskover_agent.parallel_walk('/mnt/isilon/somedir', workers=40, hosts=['stornode1', 'stornode2'])
+>>> 
+>>> diskover_agent.parallel_walk('/mnt/isilon/somedir', workers=40, hosts=hostlist)
 <generator object parallel_walk at 0x1038869b0>
-for root, dirs, files in diskover_agent.parallel_walk('/mnt/isilon/somedir', workers=40, hosts=['stornode1', 'stornode2']):
+for root, dirs, files in diskover_agent.parallel_walk('/mnt/isilon/somedir', workers=40, hosts=hostlist):
 ...     print(root, dirs, files)
 ('/mnt/isilon/somedir', ['subdir1', 'subdir2'], ['file1.ext', 'file2.ext'])
 ('/mnt/isilon/somedir/subdir1', [], ['file.ext'])
