@@ -12,7 +12,7 @@ Copy diskover_storage_agent.py to each node (for example stornode1, stornode2) o
 
 To start the http server (storage agent) on each node, run:
 
-`$ python diskover_storage_agent.py -l 0.0.0.0 -p 9999 -c 5 -r /ifs/data /mnt/isilon`
+`$ python diskover_storage_agent.py -r /ifs/data /mnt/isilon`
 
 ```
 Usage: diskover_storage_agent.py [options]
@@ -25,7 +25,7 @@ Options:
                         (default: 0.0.0.0)
   -p PORT, --port=PORT  Port for diskover storage agent (default: 9999)
   -c MAXCONNECTIONS, --maxconnections=MAXCONNECTIONS
-                        Maximum number of connections (default: 5)
+                        Maximum number of connections (default: 50)
   -r PATH PATH, --replacepath=PATH PATH
                         Replace paths from remote to local,
                         example: -r /mnt/share/ /ifs/data/
