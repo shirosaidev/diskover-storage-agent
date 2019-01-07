@@ -53,10 +53,10 @@ stornode2
 ('/mnt/isilon/someotherdir', ['subdira', 'subdirb'], ['filea.ext', 'fileb.ext'])
 >>> c.response_time()
 0.0182
->>> 
->>> diskover_agent.parallel_walk('/mnt/isilon/somedir', workers=40, hosts=hostlist)
+>>> from diskover_agent import parallel_walk as pwalk
+>>> pwalk('/mnt/isilon/somedir', workers=40, hosts=hostlist)
 <generator object parallel_walk at 0x1038869b0>
-for root, dirs, files in diskover_agent.parallel_walk('/mnt/isilon/somedir', workers=40, hosts=hostlist):
+for root, dirs, files in pwalk('/mnt/isilon/somedir', workers=40, hosts=hostlist):
 ...     print(root, dirs, files)
 ('/mnt/isilon/somedir', ['subdir1', 'subdir2'], ['file1.ext', 'file2.ext'])
 ('/mnt/isilon/somedir/subdir1', [], ['file.ext'])
