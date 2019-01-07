@@ -36,27 +36,28 @@ Example to access the http agents in python import diskover_agent.py module:
 ```
 >>> import diskover_agent
 >>> c = diskover_agent.AgentConnection(hosts=['stornode1', 'stornode2'])
+>>> c.hostlist
+['stornode1', 'stornode2']
 >>> c.connect()
->>> c.listdir('/mnt/isilon/somedir')
-<generator object listdir at 0x105e9ec30>
->>> for root, dirs, files in c.listdir('/mnt/isilon/somedir'):
-...     print(root, dirs, files)
-('/mnt/isilon/somedir', ['subdir1', 'subdir2'], ['file1.ext', 'file2.ext'])
->>> c.last_host()
+>>> c.conn_host()
 stornode1
->>> c.last_response_time()
+>>> c.listdir('/mnt/isilon/somedir')
+('/mnt/isilon/somedir', ['subdir1', 'subdir2'], ['file1.ext', 'file2.ext'])
+>>> c.response_time()
 0.0198
->>> c.listdir('/mnt/isilon/someotherdir')
-<generator object listdir at 0x105e9ec80>
->>> for root, dirs, files in c.listdir('/mnt/isilon/someotherdir'):
-...     print(root, dirs, files)
-('/mnt/isilon/someotherdir', ['subdira', 'subdirb'], ['filea.ext', 'fileb.ext'])
->>> c.last_host()
+>>> c.connect()
+>>> c.conn_host()
 stornode2
+>>> c.listdir('/mnt/isilon/someotherdir')
+('/mnt/isilon/someotherdir', ['subdira', 'subdirb'], ['filea.ext', 'fileb.ext'])
 >>> c.last_response_time()
 0.0182
->>> c.walk('/mnt/isilon/somedir')
-<generator object walk at 0x104e675f0>
+>>> diskover_agent.parallel_walk(top='/mnt/isilon/somedir', workers=40, hosts=['stornode1', 'stornode2'])
+<generator object parallel_walk at 0x1038869b0>
+for root, dirs, files in diskover_agent.parallel_walk(top='/mnt/isilon/somedir', workers=40, hosts=['stornode1', 'stornode2']):
+...     print(root, dirs, files)
+('/mnt/isilon/somedir', ['subdir1', 'subdir2'], ['file1.ext', 'file2.ext'])
+('/mnt/isilon/somedir/subdir1', [], ['file.ext'])
 ```
 
 Example using curl:

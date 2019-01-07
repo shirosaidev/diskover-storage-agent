@@ -74,6 +74,8 @@ class AgentConnection:
             return None
         self.resptime = round(time.time() - starttime, 4)
         dirlist = self.r.text.split("\n")
+        if dirlist[-1] == "":
+            dirlist.pop()
         dirs = []
         nondirs = []
         for item in dirlist:
@@ -135,7 +137,7 @@ def add_to_q(q, q_res, val, lock, item):
 def parallel_walk(top=unicode("."), workers=40, hosts=[]):
     if not hosts:
         warnings.warn("hosts list empty")
-        return None
+        return
     q = multiprocessing.Queue()
     q_res = multiprocessing.Queue()
     q_len = multiprocessing.Value('i', 0)
@@ -147,4 +149,4 @@ def parallel_walk(top=unicode("."), workers=40, hosts=[]):
 
     while q_len.value > 0:
         item = q_res.get(True)
-        print(item)
+        yield item
