@@ -51,7 +51,7 @@ stornode1
 stornode2
 >>> c.listdir('/mnt/isilon/someotherdir')
 ('/mnt/isilon/someotherdir', ['subdira', 'subdirb'], ['filea.ext', 'fileb.ext'])
->>> c.last_response_time()
+>>> c.response_time()
 0.0182
 >>> 
 >>> diskover_agent.parallel_walk('/mnt/isilon/somedir', workers=40, hosts=hostlist)
