@@ -12,7 +12,6 @@ See LICENSE for the full license text.
 import os
 import sys
 import socket
-import subprocess
 from optparse import OptionParser
 try:
     import queue as Queue
@@ -42,8 +41,8 @@ parser.add_option("-l", "--listen", default="0.0.0.0", type=str,
 					help="IP address for diskover storage agent to listen on (default: 0.0.0.0)")
 parser.add_option("-p", "--port", metavar="PORT", default=9999, type=int,
 					help="Port for diskover storage agent (default: 9999)")
-parser.add_option("-c", "--maxconnections", default=5, type=int,
-					help="Maximum number of connections (default: 5)")
+parser.add_option("-c", "--maxconnections", default=50, type=int,
+					help="Maximum number of connections (default: 50)")
 parser.add_option("-r", "--replacepath", nargs=2, metavar="PATH PATH",
                     help="Replace paths from remote to local, \
                     example: -r /mnt/share/ /ifs/data/")
@@ -54,8 +53,8 @@ if not options['replacepath']:
 	parser.error("missing required options, use -h for help")
 
 IP = options['listen']
-PORT =  options['port']
-MAX_CONNECTIONS =  options['maxconnections']
+PORT = options['port']
+MAX_CONNECTIONS = options['maxconnections']
 ROOTDIR_LOCAL = unicode(options['replacepath'][1])
 ROOTDIR_REMOTE = unicode(options['replacepath'][0])
 # remove any trailing slash from paths
@@ -65,23 +64,28 @@ if ROOTDIR_REMOTE != '/':
 	ROOTDIR_REMOTE = ROOTDIR_REMOTE.rstrip(os.path.sep)
 
 
-def send_ls_output(threadnum, path, clientsock, addr):
-    """This is the send ls output function.
+def send_listdir_output(threadnum, path, clientsock, addr):
+    """This is the send listdir output function.
     It gets a directory from the listener socket and returns
-    directory listing to client using ls.
+    directory listing to client using os.listdir.
     """
 
     try:
         starttime = time.time()
         # translate path from remote to local
         localpath = path.replace(ROOTDIR_REMOTE, ROOTDIR_LOCAL)
-        # run subprocess and get output
-        logger.info("[thread-%s]: Running ls -FAf %s for %s" % (threadnum, localpath, addr))
+        # run listdir and get output
+        logger.info("[thread-%s]: Getting listdir %s for %s" % (threadnum, localpath, addr))
         try:
-            output = subprocess.check_output(['ls', '-FAf', localpath])
+            output = ""
+            for entry in os.listdir(localpath):
+                if os.path.isdir(os.path.join(path, entry)):
+                    output += entry + "/\n"
+                elif os.path.isfile(os.path.join(path, entry)):
+                    output += entry + "\n"
 
             elapsedtime = round(time.time() - starttime, 4)
-            logger.info("[thread-%s]: Got ls %s in %s seconds" % (threadnum, localpath, elapsedtime))
+            logger.info("[thread-%s]: Got dirlist %s in %s seconds" % (threadnum, localpath, elapsedtime))
 
             # send ls output to client
             logger.info("[thread-%s]: Sending dirlist for %s to %s" % (threadnum, localpath, addr))
@@ -89,14 +93,14 @@ def send_ls_output(threadnum, path, clientsock, addr):
             response = "HTTP/1.1 200 OK\n" \
                         +"Content-Type: text/plain\n" \
                         +"\n" \
-                        +output.decode('utf-8')
+                        +output.rstrip("\n")
             clientsock.send(response.encode('utf-8'))
-        except subprocess.CalledProcessError as e:
+        except (OSError, IOError) as e:
             logger.info("[thread-%s]: Exception getting %s (%s)" % (threadnum, path, e))
             response = "HTTP/1.1 404 Not Found\n" \
                         +"Content-Type: text/plain\n" \
                         +"\n" \
-                        +"ls: %s: No such file or directory\n" % path
+                        +"listdir exception: %s (%s)\n" % (path, e)
             clientsock.send(response.encode('utf-8'))
             pass
 
@@ -128,8 +132,8 @@ def socket_thread_handler(threadnum, q):
             # decode url to path
             path = unquote(path)
             logger.info("[thread-%s]: Got dirlist request from %s" % (threadnum, addr))
-            # get dirlist from json data
-            send_ls_output(threadnum, path, clientsock, addr)
+            # get dirlist and send to client
+            send_listdir_output(threadnum, path, clientsock, addr)
 
             q.task_done()
             # close connection to client
