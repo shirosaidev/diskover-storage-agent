@@ -52,9 +52,9 @@ stornode2
 ('/mnt/isilon/someotherdir', ['subdira', 'subdirb'], ['filea.ext', 'fileb.ext'])
 >>> c.last_response_time()
 0.0182
->>> diskover_agent.parallel_walk(top='/mnt/isilon/somedir', workers=40, hosts=['stornode1', 'stornode2'])
+>>> diskover_agent.parallel_walk('/mnt/isilon/somedir', workers=40, hosts=['stornode1', 'stornode2'])
 <generator object parallel_walk at 0x1038869b0>
-for root, dirs, files in diskover_agent.parallel_walk(top='/mnt/isilon/somedir', workers=40, hosts=['stornode1', 'stornode2']):
+for root, dirs, files in diskover_agent.parallel_walk('/mnt/isilon/somedir', workers=40, hosts=['stornode1', 'stornode2']):
 ...     print(root, dirs, files)
 ('/mnt/isilon/somedir', ['subdir1', 'subdir2'], ['file1.ext', 'file2.ext'])
 ('/mnt/isilon/somedir/subdir1', [], ['file.ext'])
@@ -64,11 +64,8 @@ Example using curl:
 
 ```
 $ curl http://stornode1:9999/mnt/isilon/somedir
-./
-../
 file1.ext
 file2.ext
-somesymlink.ext*
 subdir1/
 subdir2/
 ```
