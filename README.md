@@ -12,7 +12,9 @@ Copy diskover_storage_agent.py to each node (for example stornode1, stornode2) o
 
 To start the http server (storage agent) on each node, run:
 
-`$ python diskover_storage_agent.py -r /ifs/data /mnt/isilon`
+```
+$ python diskover_storage_agent.py -r /ifs/data /mnt/isilon
+```
 
 ```
 Usage: diskover_storage_agent.py [options]
