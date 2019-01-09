@@ -3,12 +3,13 @@
 A simple http server for running on storage nodes to return dir lists. Can be run on multiple storage nodes for load balancing requests.
 
 ### Requirements
-- Python 2.6+ (no other dependencies for server)
+- Python 2.6+
+- scandir.py (in repo, for server only)
 - requests python module (only needed for client diskover_agent module)
 
 ### Usage
 
-Copy diskover_storage_agent.py to each node (for example stornode1, stornode2) on your storage cluster.
+Copy `diskover_storage_agent.py` and `scandir.py` to each node (for example stornode1, stornode2) on your storage cluster.
 
 To start the http server (storage agent) on each node, run:
 
