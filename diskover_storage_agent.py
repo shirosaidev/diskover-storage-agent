@@ -9,6 +9,7 @@ diskover storage agent is released under the Apache 2.0 license.
 See LICENSE for the full license text.
 """
 
+from scandir import scandir
 import os
 import sys
 import socket
@@ -78,22 +79,21 @@ def send_listdir_output(threadnum, path, clientsock, addr):
         logger.info("[thread-%s]: Getting listdir %s for %s" % (threadnum, localpath, addr))
         try:
             output = ""
-            for entry in os.listdir(localpath):
-                if os.path.isdir(os.path.join(path, entry)):
-                    output += entry + "/\n"
-                elif os.path.isfile(os.path.join(path, entry)):
-                    output += entry + "\n"
+            for entry in scandir(localpath):
+                if entry.is_dir(follow_symlinks=False):
+                    output += entry.name + "/\n"
+                elif entry.is_file(follow_symlinks=False):
+                    output += entry.name + "\n"
 
             elapsedtime = round(time.time() - starttime, 4)
             logger.info("[thread-%s]: Got dirlist %s in %s seconds" % (threadnum, localpath, elapsedtime))
 
-            # send ls output to client
+            # send dirlist output to client
             logger.info("[thread-%s]: Sending dirlist for %s to %s" % (threadnum, localpath, addr))
-            #clientsock.send(output)
             response = "HTTP/1.1 200 OK\n" \
                         +"Content-Type: text/plain\n" \
                         +"\n" \
-                        +output.rstrip("\n")
+                        +output
             clientsock.send(response.encode('utf-8'))
         except (OSError, IOError) as e:
             logger.info("[thread-%s]: Exception getting %s (%s)" % (threadnum, path, e))
