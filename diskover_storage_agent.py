@@ -26,7 +26,7 @@ try:
 except ImportError:
     from urllib.parse import unquote
 
-version = '0.1.0'
+version = '0.1.1'
 __version__ = version
 
 # socket buffer size
@@ -47,6 +47,8 @@ parser.add_option("-c", "--maxconnections", default=50, type=int,
 parser.add_option("-r", "--replacepath", nargs=2, metavar="PATH PATH",
                     help="Replace paths from remote to local, \
                     example: -r /mnt/share/ /ifs/data/")
+parser.add_option("-v", "--verbose", dest="verbose", action="count",
+                    help="Increase verbosity (specify multiple times for more)")
 (options, args) = parser.parse_args()
 options = vars(options)
 
@@ -63,6 +65,7 @@ if ROOTDIR_LOCAL != '/':
 	ROOTDIR_LOCAL = ROOTDIR_LOCAL.rstrip(os.path.sep)
 if ROOTDIR_REMOTE != '/':
 	ROOTDIR_REMOTE = ROOTDIR_REMOTE.rstrip(os.path.sep)
+VERBOSE = options['verbose']
 
 
 def send_listdir_output(threadnum, path, clientsock, addr):
@@ -76,7 +79,7 @@ def send_listdir_output(threadnum, path, clientsock, addr):
         # translate path from remote to local
         localpath = path.replace(ROOTDIR_REMOTE, ROOTDIR_LOCAL)
         # run listdir and get output
-        logger.info("[thread-%s]: Getting listdir %s for %s" % (threadnum, localpath, addr))
+        logger.debug("[thread-%s]: Getting listdir %s for %s" % (threadnum, localpath, addr))
         try:
             output = ""
             for entry in scandir(localpath):
@@ -86,17 +89,17 @@ def send_listdir_output(threadnum, path, clientsock, addr):
                     output += entry.name + "\n"
 
             elapsedtime = round(time.time() - starttime, 4)
-            logger.info("[thread-%s]: Got dirlist %s in %s seconds" % (threadnum, localpath, elapsedtime))
+            logger.debug("[thread-%s]: Got dirlist %s in %s seconds" % (threadnum, localpath, elapsedtime))
 
             # send dirlist output to client
-            logger.info("[thread-%s]: Sending dirlist for %s to %s" % (threadnum, localpath, addr))
+            logger.debug("[thread-%s]: Sending dirlist for %s to %s" % (threadnum, localpath, addr))
             response = "HTTP/1.1 200 OK\n" \
                         +"Content-Type: text/plain\n" \
                         +"\n" \
                         +output
             clientsock.send(response.encode('utf-8'))
         except (OSError, IOError) as e:
-            logger.info("[thread-%s]: Exception getting %s (%s)" % (threadnum, path, e))
+            logger.warning("[thread-%s]: Exception getting %s (%s)" % (threadnum, path, e))
             response = "HTTP/1.1 404 Not Found\n" \
                         +"Content-Type: text/plain\n" \
                         +"\n" \
@@ -120,32 +123,31 @@ def socket_thread_handler(threadnum, q):
             clientsock, addr = c
             data = clientsock.recv(BUFF)
             data = data.decode('utf-8')
-            #logger.info(data)
             if not data:
                 q.task_done()
                 # close connection to client
                 clientsock.close()
-                logger.info("[thread-%s]: %s closed connection" % (threadnum, addr))
+                logger.debug("[thread-%s]: %s closed connection" % (threadnum, addr))
                 continue
             # grab path from header sent by curl PUT /somepath HTTP/1.1
             path = data.split('\r\n')[0].split(" ")[1]
             # decode url to path
             path = unquote(path)
-            logger.info("[thread-%s]: Got dirlist request from %s" % (threadnum, addr))
+            logger.debug("[thread-%s]: Got dirlist request from %s" % (threadnum, addr))
             # get dirlist and send to client
             send_listdir_output(threadnum, path, clientsock, addr)
 
             q.task_done()
             # close connection to client
             clientsock.close()
-            logger.info("[thread-%s]: %s closed connection" % (threadnum, addr))
+            logger.debug("[thread-%s]: %s closed connection" % (threadnum, addr))
 
         except socket.error as e:
             q.task_done()
             logger.error("[thread-%s]: Socket error (%s)" % (threadnum, e))
             # close connection to client
             clientsock.close()
-            logger.info("[thread-%s]: %s closed connection" % (threadnum, addr))
+            logger.debug("[thread-%s]: %s closed connection" % (threadnum, addr))
             pass
 
 
@@ -171,8 +173,13 @@ def main():
         logging.DEBUG, "\033[1;33m%s\033[1;0m"
                        % logging.getLevelName(logging.DEBUG))
     logformatter = '%(asctime)s [%(levelname)s][%(name)s] %(message)s'
-    loglevel = logging.INFO
+    loglevel = logging.INFO # default
+    if VERBOSE == 1:
+        loglevel = logging.INFO
+    elif VERBOSE >= 2:
+        loglevel = logging.DEBUG
     logging.basicConfig(format=logformatter, level=loglevel)
+    logger.setLevel(loglevel)
 
     # Queue for socket threads
     q = Queue.Queue(maxsize=MAX_CONNECTIONS)
@@ -202,7 +209,7 @@ def main():
 \ \___,_\ \_\/\____/ \ \_\ \_\ \____/\ \___/ \ \____\\\ \\_\\  *\))_
  \/__,_ /\/_/\/___/   \/_/\/_/\/___/  \/__/   \/____/ \\/_/
 				  
-	  Storage Dirlist Agent v%s
+	  Storage Storage Agent v%s
 	  
 	  https://shirosaidev.github.io/diskover
 	  "Finding light in the darkness."
@@ -215,7 +222,7 @@ def main():
         while True:
             # establish connection
             clientsock, addr = serversock.accept()
-            logger.info("Got a connection from %s" % str(addr))
+            logger.debug("Got a connection from %s" % str(addr))
             # add client to list
             client = (clientsock, addr)
             # add task to Queue
