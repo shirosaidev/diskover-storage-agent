@@ -9,7 +9,7 @@ A simple http server for running on storage nodes to return dir lists. Can be ru
 
 ### Usage
 
-Copy `diskover_storage_agent.py` and `scandir.py` to each node (for example stornode1, stornode2) on your storage cluster.
+Copy `diskover_storage_agent.py` and `scandir.py` to one or multiple nodes (for example stornode1, stornode2) on your storage cluster.
 
 To start the http server (storage agent) on each node, run:
 
