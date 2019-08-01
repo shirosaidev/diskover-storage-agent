@@ -32,6 +32,7 @@ Options:
   -r PATH PATH, --replacepath=PATH PATH
                         Replace paths from remote to local,
                         example: -r /mnt/share/ /ifs/data/
+  -v, --verbose         Increase verbosity (specify multiple times for more)
 ```
 
 Example to access the http agents in python import diskover_agent.py module:
