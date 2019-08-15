@@ -14,7 +14,7 @@ Copy `diskover_storage_agent.py` and `scandir.py` to one or multiple nodes (for 
 To start the http server (storage agent) on each node, run:
 
 ```
-$ python diskover_storage_agent.py -r /ifs/data /mnt/isilon
+$ python diskover_storage_agent.py -r /mnt/isilon /ifs/data
 ```
 
 ```
